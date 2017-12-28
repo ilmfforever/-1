@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="vue.js"></script>
+</head>
+<style>
+    ul,li{
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+    .box{
+        width:400px;
+        height:auto;
+        margin:30px auto;
+    }
+    .shuru{
+        width:300px;
+        height:30px;
+        margin-bottom: 10px;
+
+    }
+    .opt{
+        width:12px;
+        height:12px;
+        border: 1px solid #aaaaaa;
+        border-radius: 50%;
+        float: left;
+        margin-top: 8px;
+        margin-right: 3px;
+    }
+    li{
+        margin-top: 10px;
+        width:300px;
+        height: 30px;
+        line-height: 30px;
+        border-bottom: 1px solid #aaaaaa;
+    }
+    .del{
+        float: right;
+    }
+    .red{
+        background: red;
+    }
+    .check{
+        color: red;
+    }
+
+
+</style>
+<body>
+<div class="root">
+      <div class="box">
+          <input class="shuru" type="text" placeholder="请输入事项" v-model="con" @keyup.13="add">
+          <div class="choose">
+              <input type="button" value="已完成" @click="changestatus('1')" :class="{check:status=='1'}">
+              <input type="button" value="未完成" @click="changestatus('0')" :class="{check:status=='0'}">
+              <input type="button" value="全部" @click="changestatus('all')" :class="{check:status=='all'}">
+          </div>
+          <ul class="list">
+              <li v-for="item in datas" v-if="item.edit">
+                  <span class="opt" @click="changestate(item)" :class="{red:item.state==1}"></span>
+                  <span @dblclick="edit(item)">{{item.title}}</span>
+                  <span class="del"  type="button" @click="del(item.id)">删除</span>
+              </li>
+              <li v-else="item.edit">
+                  <input type="text" v-model="item.title" @blur="edit(item)">
+              </li>
+          </ul>
+      </div>
+</div>
+
+</body>
+<script>
+    new Vue({
+        el:".root",
+        data:{
+            all:localStorage.doto?JSON.parse(localStorage.doto):[],
+            con:"",
+            status:"all"
+        },
+        methods:{
+            add(){
+//                if(this.con){
+//                    alert("请输入")
+//                }
+                var obj={};
+                obj.title=this.con;
+                obj.id=Math.random()+new Date().getTime();
+                obj.state=0;
+                obj.edit=true;
+                this.all.push(obj);
+                localStorage.doto=JSON.stringify(this.all)
+                this.con="";
+
+            },
+            changestatus(val){
+                this.status=val;
+            },
+            changestate(obj){
+                if(obj.state==0){
+                    obj.state=1
+                }else{
+                    obj.state=0;
+                }
+                localStorage.doto=JSON.stringify(this.all);
+            },
+            del(id){
+                 this.all=this.all.filter((a)=>{
+                    return a.id!=id;
+                })
+                localStorage.doto=JSON.stringify(this.all)
+            },
+            edit(obj){
+                obj.edit=!obj.edit
+                localStorage.doto=JSON.stringify(this.all);
+            }
+        },
+        computed:{
+            datas(){
+              return  this.all.filter((a)=>{
+                  if(this.status=='all'){
+                      return a;
+                  }else{
+                      if(a.state==this.status){
+                          return a;
+                      }
+                  }
+              })
+            }
+        }
+    })
+</script>
+</html>
